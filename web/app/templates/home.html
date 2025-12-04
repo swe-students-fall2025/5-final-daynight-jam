@@ -1,3 +1,166 @@
-<h1>Welcome Home!</h1>
-<a href="{{ url_for('auth.logout') }}">Logout</a>
-<a href="{{ url_for('pages.recipe') }}">Recipes</a>
+﻿{% extends "base.html" %}
+
+{% block title %}Home · Recipe Jam{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        text-align: center;
+        padding: 2rem 0;
+    }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        border: 2px solid #667eea20;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .cta-section {
+        text-align: center;
+        margin: 3rem 0;
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        color: white;
+    }
+
+    .cta-button {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-top: 1rem;
+        transition: transform 0.3s;
+    }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+
+    .stats {
+        display: flex;
+        justify-content: space-around;
+        margin: 2rem 0;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>🍳 What can I cook right now?</h1>
+    <p>Turn your available ingredients into delicious meals</p>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <div class="feature-icon">🥬</div>
+        <h3>Smart Ingredient Match</h3>
+        <p>Tell us what you have in your kitchen, and we'll find perfect recipes for you.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h3>Ingredient Substitutions</h3>
+        <p>Missing something? We'll suggest smart alternatives you can use instead.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">👨‍🍳</div>
+        <h3>Step-by-Step Guidance</h3>
+        <p>Follow along with detailed instructions and helpful cooking tips.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">🍽️</div>
+        <h3>Cookware Alternatives</h3>
+        <p>Don't have the right pan? We'll tell you what else works.</p>
+    </div>
+</div>
+
+<div class="cta-section">
+    <h2 style="color: white;">Ready to start cooking?</h2>
+    <p>Add your ingredients and discover amazing recipes</p>
+    <a href="{{ url_for('main.ingredients') }}" class="cta-button">Get Started →</a>
+</div>
+
+<div class="stats">
+    <div class="stat-item">
+        <div class="stat-number">1,000+</div>
+        <div class="stat-label">Recipes</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">500+</div>
+        <div class="stat-label">Ingredients</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number">100+</div>
+        <div class="stat-label">Substitutions</div>
+    </div>
+</div>
+
+<section style="margin-top: 3rem;">
+    <h2>How It Works</h2>
+    <ol style="line-height: 2; font-size: 1.1rem;">
+        <li><strong>Add your ingredients</strong> - Tell us what's in your pantry</li>
+        <li><strong>Discover recipes</strong> - We'll match you with compatible dishes</li>
+        <li><strong>Start cooking</strong> - Follow our step-by-step guide</li>
+        <li><strong>Enjoy your meal</strong> - Share your culinary creation!</li>
+    </ol>
+</section>
+{% endblock %}

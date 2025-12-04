@@ -1,56 +1,51 @@
-from flask import Blueprint, request, redirect, url_for, render_template, flash
-from flask_bcrypt import Bcrypt
-from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin
-from .db import users_collection
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
+from .db import create_user, find_user
 
-auth_bp = Blueprint('auth', __name__)
-bcrypt = Bcrypt()
-login_manager = LoginManager()
-login_manager.login_view = "auth.login"
-
-class User(UserMixin):
-    def __init__(self, user_dict):
-        self.id = str(user_dict["_id"])
-        self.username = user_dict["username"]
-        self.password_hash = user_dict["password"]
-
-@login_manager.user_loader
-def load_user(user_id):
-    user_dict = users_collection.find_one({"_id": user_id})
-    if user_dict:
-        return User(user_dict)
-    return None
+auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        if users_collection.find_one({"username": username}):
-            flash("Username already exists")
-            return redirect(url_for("auth.register"))
-        pw_hash = bcrypt.generate_password_hash(password).decode("utf-8")
-        users_collection.insert_one({"username": username, "password": pw_hash})
-        flash("User created! Please login.")
-        return redirect(url_for("auth.login"))
-    return render_template("register.html")
+        data = request.form
+        username = data.get("username")
+        password = data.get("password")
+        if not username or not password:
+            return render_template("register.html", error="Require username and password")
+        pw_hash = generate_password_hash(password)
+        ok = create_user(username, pw_hash)
+        if not ok:
+            return render_template("register.html", error="User exists")
+        # auto-login
+        session["user"] = username
+        return redirect(url_for("main.index"))
+    return render_template("register.html")  
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        user_dict = users_collection.find_one({"username": username})
-        if user_dict and bcrypt.check_password_hash(user_dict["password"], password):
-            user = User(user_dict)
-            login_user(user)
-            return redirect(url_for("pages.home"))
-        flash("Invalid username or password")
-        return redirect(url_for("auth.login"))
+        data = request.form
+        username = data.get("username")
+        password = data.get("password")
+        if not username or not password:
+            return render_template("login.html", error="Require username and passwor")
+        user = find_user(username)
+        if not user:
+            return render_template("login.html", error="User does not exist")
+        pw_hash = user.get("password")
+        if not check_password_hash(pw_hash, password):
+            return render_template("login.html", error="Wrong password")
+        session["user"] = username
+        return redirect(url_for("main.index"))
     return render_template("login.html")
 
 @auth_bp.route("/logout")
-@login_required
 def logout():
-    logout_user()
+    session.pop("user", None)
     return redirect(url_for("auth.login"))
+
+# small API for tests
+@auth_bp.route("/api/me")
+def me():
+    user = session.get("user")
+    return jsonify({"user": user})
