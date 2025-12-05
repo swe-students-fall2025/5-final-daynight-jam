@@ -1,0 +1,246 @@
+﻿{% extends "base.html" %}
+
+{% block title %}My Ingredients · Recipe Jam{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ingredient-input-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+        .input-group input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .input-group button {
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+            .input-group button:hover {
+                background: #764ba2;
+            }
+
+    .quick-add {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .quick-add-btn {
+        padding: 0.5rem 1rem;
+        background: white;
+        border: 2px solid #667eea;
+        color: #667eea;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+        .quick-add-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+    .ingredients-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .ingredient-tag {
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 2px solid #667eea20;
+    }
+
+    .ingredient-name {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .remove-btn {
+        background: #ff4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        transition: background 0.3s;
+    }
+
+        .remove-btn:hover {
+            background: #cc0000;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .find-recipes-btn {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 2rem;
+        transition: transform 0.3s;
+    }
+
+        .find-recipes-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .find-recipes-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>🥬 My Ingredients</h1>
+<p style="color: #666; margin-bottom: 2rem;">Add ingredients you have available to find matching recipes</p>
+
+<div class="ingredient-input-section">
+    <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Add Ingredient</h2>
+    <div class="input-group">
+        <input type="text"
+               id="ingredient-input"
+               placeholder="e.g., chicken, tomatoes, garlic..."
+               onkeypress="if(event.key === 'Enter') addIngredient()" />
+        <button onclick="addIngredient()">Add</button>
+    </div>
+
+    <div style="margin-top: 1rem;">
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Quick add:</p>
+        <div class="quick-add">
+            <button class="quick-add-btn" onclick="quickAdd('Chicken')">🍗 Chicken</button>
+            <button class="quick-add-btn" onclick="quickAdd('Eggs')">🥚 Eggs</button>
+            <button class="quick-add-btn" onclick="quickAdd('Tomatoes')">🍅 Tomatoes</button>
+            <button class="quick-add-btn" onclick="quickAdd('Onions')">🧅 Onions</button>
+            <button class="quick-add-btn" onclick="quickAdd('Garlic')">🧄 Garlic</button>
+            <button class="quick-add-btn" onclick="quickAdd('Rice')">🍚 Rice</button>
+            <button class="quick-add-btn" onclick="quickAdd('Pasta')">🍝 Pasta</button>
+            <button class="quick-add-btn" onclick="quickAdd('Cheese')">🧀 Cheese</button>
+        </div>
+    </div>
+</div>
+
+<h2>Your Ingredients</h2>
+<div id="ingredients-container">
+    <div class="empty-state">
+        <div class="empty-state-icon">🍽️</div>
+        <p>No ingredients added yet</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Start adding ingredients to find recipes!</p>
+    </div>
+</div>
+
+<button class="find-recipes-btn" id="find-recipes-btn" onclick="findRecipes()" disabled>
+    Find Recipes with These Ingredients
+</button>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let ingredients = [];
+
+  function addIngredient() {
+    const input = document.getElementById('ingredient-input');
+    const ingredient = input.value.trim();
+
+    if (ingredient && !ingredients.includes(ingredient)) {
+      ingredients.push(ingredient);
+      input.value = '';
+      renderIngredients();
+    }
+  }
+
+  function quickAdd(ingredient) {
+    if (!ingredients.includes(ingredient)) {
+      ingredients.push(ingredient);
+      renderIngredients();
+    }
+  }
+
+  function removeIngredient(ingredient) {
+    ingredients = ingredients.filter(i => i !== ingredient);
+    renderIngredients();
+  }
+
+  function renderIngredients() {
+    const container = document.getElementById('ingredients-container');
+    const findBtn = document.getElementById('find-recipes-btn');
+
+    if (ingredients.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🍽️</div>
+          <p>No ingredients added yet</p>
+          <p style="font-size: 0.9rem; margin-top: 0.5rem;">Start adding ingredients to find recipes!</p>
+        </div>
+      `;
+      findBtn.disabled = true;
+    } else {
+      container.innerHTML = `
+        <div class="ingredients-grid">
+          ${ingredients.map(ing => `
+            <div class="ingredient-tag">
+              <span class="ingredient-name">${ing}</span>
+              <button class="remove-btn" onclick="removeIngredient('${ing}')">×</button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      findBtn.disabled = false;
+    }
+  }
+
+  function findRecipes() {
+    // Store ingredients in localStorage for the recipe page to use
+    localStorage.setItem('selectedIngredients', JSON.stringify(ingredients));
+    window.location.href = "{{ url_for('main.recipe') }}";
+  }
+</script>
+{% endblock %}

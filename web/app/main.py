@@ -1,19 +1,49 @@
-from flask import Flask
-from .auth import auth_bp, bcrypt, login_manager
-from .pages import pages_bp
+from flask import Blueprint, render_template, request, session, redirect, url_for
+from .db import insert_recipe
 
-def create_app():
-    app = Flask(__name__)
-    app.secret_key = "supersecretkey"
+main_bp = Blueprint("main", __name__)
 
-    bcrypt.init_app(app)
-    login_manager.init_app(app)
+def login_required(f):
+    """Simple session-based login check"""
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user" not in session:
+            return redirect(url_for("auth.login"))
+        return f(*args, **kwargs)
+    return decorated_function
 
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(pages_bp)
+@main_bp.route("/")
+@login_required
+def index():
+    """Home page"""
+    return render_template("home.html")
 
-    return app
+@main_bp.route("/home")
+@login_required
+def home():
+    """Home page with project overview"""
+    return render_template("home.html")
 
-if __name__ == "__main__":
-    app = create_app()
-    app.run(host="0.0.0.0", port=8000, debug=True)
+@main_bp.route("/ingredients")
+@login_required
+def ingredients():
+    """Page to manage user's available ingredients"""
+    return render_template("ingredients.html")
+
+@main_bp.route("/recipe")
+@login_required
+def recipe():
+    """Recipe listing and detail page"""
+    return render_template("recipe.html")
+
+@main_bp.route("/result")
+@login_required
+def result_page():
+    """Result page - expects query string with recipe_id"""
+    recipe_id = request.args.get("recipe_id")
+    recipe = None
+    if recipe_id:
+        from .db import find_recipe_by_id
+        recipe = find_recipe_by_id(recipe_id)
+    return render_template("result.html", recipe=recipe)

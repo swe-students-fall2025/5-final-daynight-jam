@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Recipe Recommendation</h2>
+
+<div>
+    <label>Ingredients you want (include)</label><br>
+    <input id="include-input" placeholder="Type ingredient and press Enter" />
+    <div id="include-list"></div>
+</div>
+
+<div>
+    <label>Ingredients you don't want (exclude)</label><br>
+    <input id="exclude-input" placeholder="Type ingredient and press Enter" />
+    <div id="exclude-list"></div>
+</div>
+
+<div>
+    <label>Cuisine</label><br>
+    <select id="cuisine">
+        <option value="">Any</option>
+        <option>Chinese</option>
+        <option>Japanese</option>
+        <option>Italian</option>
+        <option>Mexican</option>
+    </select>
+</div>
+
+<div>
+    <label>Taste</label><br>
+    <select id="taste">
+        <option value="">Any</option>
+        <option>Spicy</option>
+        <option>Sweet</option>
+        <option>Salty</option>
+    </select>
+</div>
+
+<div>
+    <label>Dietary Restrictions</label><br>
+    <input id="diet" placeholder="e.g. gluten_free, no_nuts" />
+</div>
+
+<br>
+<button id="submit-btn" class="btn">Get Recommendation</button>
+
+<hr />
+
+<h3>Results</h3>
+<div id="results"></div>
+
+{% endblock %}
