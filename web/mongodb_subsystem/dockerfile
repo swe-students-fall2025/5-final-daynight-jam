@@ -1,0 +1,14 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN pip install --no-cache-dir pymongo
+
+COPY . /app
+
+ENV MONGO_URI=mongodb://mongodb:27017/food_recommendation
+
+CMD ["python", "-c", "from db import init_mongo; init_mongo(); import time; print('mongodb_subsystem started and initialized'); time.sleep(10**9)"]
