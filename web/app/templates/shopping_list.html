@@ -1,0 +1,1005 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Shopping List · Recipe Jam{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ═══════════════════════════════════════════════════════════
+       SHOPPING LIST - WARM KITCHEN THEME
+       ═══════════════════════════════════════════════════════════ */
+
+    /* Floating food particles background */
+    .particles-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: -1;
+    }
+
+    .particle {
+        position: absolute;
+        font-size: 2rem;
+        opacity: 0.15;
+        animation: float-particle 20s infinite linear;
+    }
+
+    @keyframes float-particle {
+        0% {
+            transform: translateY(100vh) rotate(0deg);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 0.15;
+        }
+
+        90% {
+            opacity: 0.15;
+        }
+
+        100% {
+            transform: translateY(-100px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    /* Page header with warm gradient animation */
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), #ff8c42, var(--primary));
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 5s ease infinite;
+        }
+
+    @keyframes gradient-shift {
+        0%, 100% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+
+    .page-header p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Stats cards with warm colors */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #fff 0%, var(--bg-warm) 100%);
+        padding: 1.5rem;
+        border-radius: 16px;
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+            border-color: var(--primary);
+        }
+
+        .stat-card.total {
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card.checked {
+            border-left: 4px solid var(--accent);
+        }
+
+        .stat-card.remaining {
+            border-left: 4px solid var(--secondary);
+        }
+
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-card.checked .stat-number {
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
+
+    .stat-card.remaining .stat-number {
+        background: linear-gradient(135deg, var(--secondary), #ff6b6b);
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Add item section */
+    .add-section {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(230, 57, 70, 0.05) 100%);
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        border: 2px dashed rgba(255, 107, 53, 0.3);
+        transition: all 0.3s;
+    }
+
+        .add-section:focus-within {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%);
+        }
+
+    .add-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .input-group {
+        flex: 1;
+        min-width: 200px;
+        position: relative;
+    }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+            .input-group input:focus {
+                outline: none;
+                border-color: var(--primary);
+                box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+            }
+
+        .input-group .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
+
+    .quantity-input {
+        width: 120px !important;
+        flex: 0 0 120px;
+    }
+
+    .add-btn {
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+    }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+        .add-btn:active {
+            transform: translateY(0);
+        }
+
+    /* Shopping list container */
+    .list-container {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--bg-warm) 0%, #fff 100%);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .list-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .action-btn {
+        padding: 0.6rem 1.2rem;
+        border: 2px solid var(--border-light);
+        border-radius: 8px;
+        background: white;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .action-btn.danger:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+            background: #fff5f5;
+        }
+
+    /* Shopping items */
+    .shopping-items {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .shopping-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.3s;
+        animation: slideIn 0.4s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .shopping-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        transform: scaleY(0);
+        transition: transform 0.3s;
+    }
+
+    .shopping-item:hover {
+        background: var(--bg-warm);
+    }
+
+        .shopping-item:hover::before {
+            transform: scaleY(1);
+        }
+
+    .shopping-item.checked {
+        background: linear-gradient(90deg, rgba(42, 157, 143, 0.1) 0%, #fff 100%);
+    }
+
+        .shopping-item.checked::before {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            transform: scaleY(1);
+        }
+
+    .shopping-item.removing {
+        animation: slideOut 0.4s ease-out forwards;
+    }
+
+    @keyframes slideOut {
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
+    }
+
+    /* Custom checkbox */
+    .checkbox-wrapper {
+        position: relative;
+        margin-right: 1rem;
+    }
+
+    .custom-checkbox {
+        width: 26px;
+        height: 26px;
+        border: 2px solid #ddd;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        background: white;
+    }
+
+        .custom-checkbox:hover {
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .custom-checkbox.checked {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-color: transparent;
+            animation: checkBounce 0.4s ease;
+        }
+
+    @keyframes checkBounce {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+    }
+
+    .custom-checkbox .check-icon {
+        color: white;
+        font-size: 0.9rem;
+        opacity: 0;
+        transform: scale(0);
+        transition: all 0.2s;
+    }
+
+    .custom-checkbox.checked .check-icon {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Item details */
+    .item-details {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .item-name {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-dark);
+        transition: all 0.3s;
+    }
+
+    .shopping-item.checked .item-name {
+        text-decoration: line-through;
+        color: #999;
+    }
+
+    .item-quantity {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        background: var(--bg-warm);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+
+    .item-category {
+        font-size: 0.75rem;
+        color: var(--primary);
+        background: rgba(255, 107, 53, 0.1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+
+    /* Remove button */
+    .remove-btn {
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 50%;
+        background: var(--bg-warm);
+        color: #999;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        opacity: 0;
+    }
+
+    .shopping-item:hover .remove-btn {
+        opacity: 1;
+    }
+
+    .remove-btn:hover {
+        background: #ffebee;
+        color: var(--secondary);
+        transform: rotate(90deg);
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #999;
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state .cta-btn {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+        .empty-state .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        z-index: 1000;
+    }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+        }
+
+    /* Progress bar */
+    .progress-section {
+        margin-bottom: 2rem;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .progress-bar {
+        height: 12px;
+        background: var(--border-light);
+        border-radius: 6px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-light));
+        border-radius: 6px;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .add-form {
+            flex-direction: column;
+        }
+
+        .quantity-input {
+            width: 100% !important;
+            flex: 1;
+        }
+
+        .stats-row {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+        }
+
+        .action-buttons {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Floating particles background -->
+<div class="particles-container" id="particles">
+    <!-- Particles will be added via JavaScript -->
+</div>
+
+<!-- Page header -->
+<div class="page-header">
+    <h1>🛒 Shopping List</h1>
+    <p>Keep track of ingredients you need to buy</p>
+</div>
+
+<!-- Stats row -->
+<div class="stats-row">
+    <div class="stat-card total">
+        <span class="stat-icon">📝</span>
+        <div class="stat-number" id="total-count">{{ items | length }}</div>
+        <div class="stat-label">Total Items</div>
+    </div>
+    <div class="stat-card checked">
+        <span class="stat-icon">✅</span>
+        <div class="stat-number" id="checked-count">{{ items | selectattr('checked') | list | length }}</div>
+        <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card remaining">
+        <span class="stat-icon">🛍️</span>
+        <div class="stat-number" id="remaining-count">{{ items | rejectattr('checked') | list | length }}</div>
+        <div class="stat-label">Remaining</div>
+    </div>
+</div>
+
+<!-- Progress bar -->
+<div class="progress-section">
+    <div class="progress-header">
+        <span>Shopping Progress</span>
+        <span id="progress-percent">{% if items | length > 0 %}{{ ((items | selectattr('checked') | list | length) / (items | length) * 100) | int }}{% else %}0{% endif %}%</span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: {% if items | length > 0 %}{{ ((items | selectattr('checked') | list | length) / (items | length) * 100) | int }}{% else %}0{% endif %}%"></div>
+    </div>
+</div>
+
+<!-- Add item section -->
+<div class="add-section">
+    <form class="add-form" onsubmit="addItem(event)">
+        <div class="input-group">
+            <span class="input-icon">🥬</span>
+            <input type="text"
+                   id="item-input"
+                   placeholder="Add an ingredient..."
+                   autocomplete="off"
+                   required />
+        </div>
+        <div class="input-group">
+            <span class="input-icon">📏</span>
+            <input type="text"
+                   id="quantity-input"
+                   class="quantity-input"
+                   placeholder="Qty (optional)" />
+        </div>
+        <button type="submit" class="add-btn">
+            <span>➕</span>
+            Add to List
+        </button>
+    </form>
+</div>
+
+<!-- Shopping list -->
+<div class="list-container">
+    <div class="list-header">
+        <div class="list-title">
+            <span>🧾</span>
+            My Shopping List
+        </div>
+        <div class="action-buttons">
+            <button class="action-btn" onclick="clearChecked()">
+                <span>🧹</span>
+                Clear Done
+            </button>
+            <button class="action-btn danger" onclick="clearAll()">
+                <span>🗑️</span>
+                Clear All
+            </button>
+        </div>
+    </div>
+
+    <ul class="shopping-items" id="shopping-list">
+        {% if items %}
+        {% for item in items %}
+        <li class="shopping-item {% if item.checked %}checked{% endif %}" data-name="{{ item.name }}">
+            <div class="checkbox-wrapper">
+                <div class="custom-checkbox {% if item.checked %}checked{% endif %}" onclick="toggleItem('{{ item.name }}')">
+                    <span class="check-icon">✓</span>
+                </div>
+            </div>
+            <div class="item-details">
+                <span class="item-name">{{ item.name }}</span>
+                {% if item.quantity %}
+                <span class="item-quantity">{{ item.quantity }}</span>
+                {% endif %}
+            </div>
+            <button class="remove-btn" onclick="removeItem('{{ item.name }}')" title="Remove">×</button>
+        </li>
+        {% endfor %}
+        {% else %}
+        <li class="empty-state" id="empty-state">
+            <div class="empty-icon">🛒</div>
+            <h3>Your shopping list is empty</h3>
+            <p>Add ingredients from recipes or type them above!</p>
+            <a href="{{ url_for('pages.recipe') }}" class="cta-btn">Find Recipes →</a>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span class="toast-message">Item added!</span>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Create floating particles
+    function createParticles() {
+        const container = document.getElementById('particles');
+        const emojis = ['🥕', '🍅', '🧅', '🥬', '🍳', '🧀', '🥛', '🍞', '🥚', '🍗', '🥩', '🐟', '🌶️', '🥒', '🍋'];
+
+        for (let i = 0; i < 15; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            container.appendChild(particle);
+        }
+    }
+
+    createParticles();
+
+    // Show toast notification
+    function showToast(message, type = 'default') {
+        const toast = document.getElementById('toast');
+        const msgSpan = toast.querySelector('.toast-message');
+        msgSpan.textContent = message;
+
+        toast.className = 'toast show';
+        if (type === 'success') toast.classList.add('success');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // Update stats
+    function updateStats() {
+        const items = document.querySelectorAll('.shopping-item:not(.empty-state)');
+        const checkedItems = document.querySelectorAll('.shopping-item.checked');
+
+        const total = items.length;
+        const checked = checkedItems.length;
+        const remaining = total - checked;
+        const percent = total > 0 ? Math.round((checked / total) * 100) : 0;
+
+        document.getElementById('total-count').textContent = total;
+        document.getElementById('checked-count').textContent = checked;
+        document.getElementById('remaining-count').textContent = remaining;
+        document.getElementById('progress-percent').textContent = percent + '%';
+        document.getElementById('progress-fill').style.width = percent + '%';
+
+        // Show/hide empty state
+        const emptyState = document.getElementById('empty-state');
+        const shoppingList = document.getElementById('shopping-list');
+
+        if (total === 0 && !emptyState) {
+            shoppingList.innerHTML = `
+                <li class="empty-state" id="empty-state">
+                    <div class="empty-icon">🛒</div>
+                    <h3>Your shopping list is empty</h3>
+                    <p>Add ingredients from recipes or type them above!</p>
+                    <a href="{{ url_for('pages.recipe') }}" class="cta-btn">Find Recipes →</a>
+                </li>
+            `;
+        }
+    }
+
+    // Add item
+    async function addItem(event) {
+        event.preventDefault();
+
+        const nameInput = document.getElementById('item-input');
+        const qtyInput = document.getElementById('quantity-input');
+        const name = nameInput.value.trim();
+        const quantity = qtyInput.value.trim();
+
+        if (!name) return;
+
+        try {
+            const response = await fetch('/shopping-list/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: name, quantity: quantity })
+            });
+
+            if (response.ok) {
+                // Remove empty state if present
+                const emptyState = document.getElementById('empty-state');
+                if (emptyState) emptyState.remove();
+
+                // Add item to list
+                const list = document.getElementById('shopping-list');
+                const li = document.createElement('li');
+                li.className = 'shopping-item';
+                li.dataset.name = name;
+                li.innerHTML = `
+                    <div class="checkbox-wrapper">
+                        <div class="custom-checkbox" onclick="toggleItem('${name}')">
+                            <span class="check-icon">✓</span>
+                        </div>
+                    </div>
+                    <div class="item-details">
+                        <span class="item-name">${name}</span>
+                        ${quantity ? `<span class="item-quantity">${quantity}</span>` : ''}
+                    </div>
+                    <button class="remove-btn" onclick="removeItem('${name}')" title="Remove">×</button>
+                `;
+                list.appendChild(li);
+
+                // Clear inputs
+                nameInput.value = '';
+                qtyInput.value = '';
+                nameInput.focus();
+
+                updateStats();
+                showToast(`Added "${name}" to list`, 'success');
+            }
+        } catch (err) {
+            console.error('Error adding item:', err);
+        }
+    }
+
+    // Toggle item checked status
+    async function toggleItem(name) {
+        try {
+            const response = await fetch('/shopping-list/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: name })
+            });
+
+            if (response.ok) {
+                const item = document.querySelector(`.shopping-item[data-name="${name}"]`);
+                const checkbox = item.querySelector('.custom-checkbox');
+
+                item.classList.toggle('checked');
+                checkbox.classList.toggle('checked');
+
+                updateStats();
+            }
+        } catch (err) {
+            console.error('Error toggling item:', err);
+        }
+    }
+
+    // Remove item
+    async function removeItem(name) {
+        try {
+            const response = await fetch('/shopping-list/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: name })
+            });
+
+            if (response.ok) {
+                const item = document.querySelector(`.shopping-item[data-name="${name}"]`);
+                item.classList.add('removing');
+
+                setTimeout(() => {
+                    item.remove();
+                    updateStats();
+                }, 400);
+
+                showToast(`Removed "${name}"`);
+            }
+        } catch (err) {
+            console.error('Error removing item:', err);
+        }
+    }
+
+    // Clear checked items
+    async function clearChecked() {
+        if (!confirm('Remove all completed items?')) return;
+
+        try {
+            const response = await fetch('/shopping-list/clear-checked', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.ok) {
+                const checkedItems = document.querySelectorAll('.shopping-item.checked');
+                checkedItems.forEach(item => {
+                    item.classList.add('removing');
+                    setTimeout(() => item.remove(), 400);
+                });
+
+                setTimeout(() => updateStats(), 450);
+                showToast('Cleared completed items', 'success');
+            }
+        } catch (err) {
+            console.error('Error clearing checked:', err);
+        }
+    }
+
+    // Clear all items
+    async function clearAll() {
+        if (!confirm('Remove ALL items from your shopping list?')) return;
+
+        try {
+            const response = await fetch('/shopping-list/clear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.ok) {
+                const items = document.querySelectorAll('.shopping-item:not(.empty-state)');
+                items.forEach((item, i) => {
+                    setTimeout(() => {
+                        item.classList.add('removing');
+                        setTimeout(() => item.remove(), 400);
+                    }, i * 100);
+                });
+
+                setTimeout(() => updateStats(), items.length * 100 + 450);
+                showToast('Shopping list cleared');
+            }
+        } catch (err) {
+            console.error('Error clearing all:', err);
+        }
+    }
+
+    // Keyboard shortcut: Enter to add
+    document.getElementById('item-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addItem(e);
+        }
+    });
+</script>
+{% endblock %}
