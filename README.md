@@ -1,6 +1,7 @@
 # Final Project
 
-![Web App CI](/.github/workflows/web.yml)
+![Web App CI](https://github.com/swe-students-fall2025/5-final-daynight-jam/actions/workflows/web.yml/badge.svg)
+
 
 
 An exercise to put to practice software development teamwork, subsystem communication, containers, deployment, and CI/CD pipelines. See [instructions](./instructions.md) for details.
