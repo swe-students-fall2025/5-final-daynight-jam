@@ -1,6 +1,8 @@
 # Final Project
 
-![Web App CI](https://github.com/swe-students-fall2025/5-final-daynight-jam/actions/workflows/web.yml/badge.svg)
+[![Web App CI](https://github.com/swe-students-fall2025/5-final-daynight-jam/actions/workflows/web.yml/badge.svg)](
+https://github.com/swe-students-fall2025/5-final-daynight-jam/actions/workflows/web.yml
+)
 
 
 
