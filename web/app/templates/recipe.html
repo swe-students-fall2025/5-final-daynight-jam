@@ -4,154 +4,747 @@
 
 {% block extra_css %}
 <style>
-  .recipe-container {
-    margin-top: 2rem;
-  }
+    /* Recipe page - warm kitchen theme */
+    .recipe-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
 
-  .recipe-card {
-    padding: 1.5rem;
-    background: #ffffff;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-  }
+        .recipe-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
 
-  .recipe-card h2 {
-    margin-top: 0;
-  }
+        .recipe-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
 
-  .pill {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    border: 1px solid #ddd;
-    font-size: 0.8rem;
-    margin-right: 0.5rem;
-    margin-bottom: 0.25rem;
-    background: #f8f9fa;
-  }
+    /* Status badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(230, 57, 70, 0.1) 100%);
+        border: 2px solid rgba(255, 107, 53, 0.3);
+        border-radius: 25px;
+        font-size: 0.9rem;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+    }
 
-  .section-title {
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-  }
+    /* Recipe card with fancy effects */
+    .recipe-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        animation: cardAppear 0.6s ease-out;
+        position: relative;
+    }
 
-  .back-link {
-    margin-top: 1.5rem;
-    display: inline-block;
-    font-size: 0.9rem;
-  }
+    @keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
 
-  .status-text {
-    color: #666;
-    margin-bottom: 1rem;
-  }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
 
-  .error-text {
-    color: #b00020;
-  }
+    .recipe-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary), #ff8c42, var(--primary));
+        background-size: 300% 100%;
+        animation: gradient-flow 3s ease infinite;
+    }
+
+    @keyframes gradient-flow {
+        0%, 100% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+
+    .recipe-header-section {
+        padding: 2rem;
+        background: linear-gradient(135deg, var(--bg-warm) 0%, #fff 100%);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .recipe-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+        .recipe-title .emoji {
+            font-size: 2.5rem;
+            animation: bounce 2s infinite;
+        }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    .recipe-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 1rem;
+        border-radius: 25px;
+        font-size: 0.85rem;
+        background: white;
+        border: 2px solid var(--border-light);
+        color: var(--text-muted);
+    }
+
+        .meta-pill.id {
+            border-color: rgba(255, 107, 53, 0.3);
+            color: var(--primary);
+        }
+
+    /* Content sections */
+    .recipe-content {
+        padding: 2rem;
+    }
+
+    .recipe-section {
+        margin-bottom: 2rem;
+        animation: sectionFade 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+        .recipe-section:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .recipe-section:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .recipe-section:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .recipe-section:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+    @keyframes sectionFade {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Ingredients list with shopping integration */
+    .ingredients-list {
+        list-style: none;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .ingredient-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-warm);
+        border-radius: 12px;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+        .ingredient-item:hover {
+            background: white;
+            border-color: rgba(255, 107, 53, 0.3);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+    .ingredient-icon {
+        font-size: 1.2rem;
+    }
+
+    .ingredient-name {
+        flex: 1;
+        font-weight: 500;
+    }
+
+    .ingredient-amount {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .add-to-cart-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        opacity: 0;
+    }
+
+    .ingredient-item:hover .add-to-cart-btn {
+        opacity: 1;
+    }
+
+    .add-to-cart-btn:hover {
+        transform: scale(1.15);
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+    }
+
+    .add-to-cart-btn.added {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+        animation: addedPop 0.4s ease;
+    }
+
+    @keyframes addedPop {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.3);
+        }
+    }
+
+    /* Add all button */
+    .add-all-btn {
+        padding: 0.6rem 1.2rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+        .add-all-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+
+    /* Steps with timeline */
+    .steps-list {
+        list-style: none;
+        position: relative;
+        padding-left: 2rem;
+    }
+
+        .steps-list::before {
+            content: '';
+            position: absolute;
+            left: 0.75rem;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+
+    .step-item {
+        position: relative;
+        padding: 1rem 0 1rem 1.5rem;
+        transition: all 0.3s;
+    }
+
+        .step-item::before {
+            content: attr(data-step);
+            position: absolute;
+            left: -1.5rem;
+            top: 1rem;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+            transition: all 0.3s;
+        }
+
+        .step-item:hover::before {
+            transform: scale(1.15);
+        }
+
+    .step-content {
+        background: var(--bg-warm);
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+
+    .step-item:hover .step-content {
+        background: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Tools section */
+    .tools-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .tool-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        background: linear-gradient(135deg, rgba(42, 157, 143, 0.1) 0%, rgba(64, 180, 166, 0.1) 100%);
+        border: 2px solid rgba(42, 157, 143, 0.3);
+        border-radius: 25px;
+        color: var(--accent);
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+        .tool-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(42, 157, 143, 0.2);
+        }
+
+    /* Substitutions section */
+    .substitutions-list {
+        list-style: none;
+    }
+
+    .substitution-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
+        border: 2px solid rgba(255, 152, 0, 0.3);
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s;
+    }
+
+        .substitution-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.15);
+        }
+
+    .sub-icon {
+        font-size: 1.3rem;
+    }
+
+    .sub-arrow {
+        color: #ff9800;
+        font-weight: 700;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-15px);
+        }
+    }
+
+    .empty-state h2 {
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Back link */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        padding: 0.75rem 1.5rem;
+        color: var(--primary);
+        text-decoration: none;
+        border: 2px solid var(--primary);
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+        .back-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        z-index: 1000;
+    }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .ingredients-list {
+            grid-template-columns: 1fr;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<h1>🍲 Recipe Results</h1>
-
-<div class="recipe-container">
-  {% if include %}
-    <p class="status-text">
-      Using ingredients:
-      <strong>{{ include | join(", ") }}</strong>
-    </p>
-  {% else %}
-    <p class="status-text">
-      No ingredients submitted yet. Go back to the ingredients page to add some.
-    </p>
-  {% endif %}
-
-  {% if recipe %}
-    <div class="recipe-card">
-      <h2>{{ recipe.name or "Recipe suggestion" }}</h2>
-
-      <div style="margin-bottom: 1rem;">
-        {% if recipe.recipe_id %}
-          <span class="pill">ID: {{ recipe.recipe_id }}</span>
-        {% endif %}
-      </div>
-
-      <h3 class="section-title">Ingredients</h3>
-      {% if recipe.ingredients %}
-        <ul>
-          {% for ing in recipe.ingredients %}
-            <li>
-              {% if ing.name %}
-                {{ ing.name }}{% if ing.amount %} – {{ ing.amount }}{% endif %}
-              {% else %}
-                {{ ing }}
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="status-text">(No ingredients list provided)</p>
-      {% endif %}
-
-      <h3 class="section-title">Steps</h3>
-      {% if recipe.steps %}
-        <ol>
-          {% for step in recipe.steps %}
-            <li>{{ step }}</li>
-          {% endfor %}
-        </ol>
-      {% else %}
-        <p class="status-text">(No steps provided)</p>
-      {% endif %}
-
-      {% if recipe.tools %}
-        <h3 class="section-title">Tools</h3>
-        <p>
-          {% for tool in recipe.tools %}
-            <span class="pill">{{ tool }}</span>
-          {% endfor %}
-        </p>
-      {% endif %}
-
-      {% if recipe.substitutions %}
-      <h3 class="section-title">Substitutions</h3>
-      <ul>
-        {# Case 1: substitutions is a dict, e.g. {"milk": "oat milk"} #}
-        {% if recipe.substitutions is mapping %}
-          {% for key, value in recipe.substitutions.items() %}
-        <li>{{ key }} → {{ value }}</li>
-        {% endfor %}
-        {# Case 2: substitutions is a list of strings, like from the ML client #}
-        {% else %}
-        {% for sub in recipe.substitutions %}
-        <li>{{ sub }}</li>
-        {% endfor %}
-        {% endif %}
-      </ul>
-      {% endif %}
-    </div>
-  {% else %}
-    <p class="status-text">
-      No recipe suggestions yet. Try entering some ingredients on the ingredients page.
-    </p>
-  {% endif %}
-
-  {% if other_suggestions %}
-    <h2 class="section-title">Other suggestions</h2>
-    <ul>
-      {% for r in other_suggestions %}
-        <li>{{ r.name }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-
-  <a href="{{ url_for('pages.ingredients') }}" class="back-link">
-    ← Back to My Ingredients
-  </a>
+<div class="recipe-header">
+    <h1>🍲 Recipe Results</h1>
+    <p>Delicious recipes based on your ingredients</p>
 </div>
+
+{% if include %}
+<div style="text-align: center;">
+    <span class="status-badge">
+        🥬 Using: <strong>{{ include | join(", ") }}</strong>
+    </span>
+</div>
+{% endif %}
+
+{% if recipe %}
+<div class="recipe-card">
+    <div class="recipe-header-section">
+        <h2 class="recipe-title">
+            <span class="emoji">👨‍🍳</span>
+            {{ recipe.name or "Delicious Recipe" }}
+        </h2>
+        <div class="recipe-meta">
+            {% if recipe.recipe_id %}
+            <span class="meta-pill id">🔖 ID: {{ recipe.recipe_id }}</span>
+            {% endif %}
+            {% if recipe.ingredients %}
+            <span class="meta-pill">🥗 {{ recipe.ingredients | length }} ingredients</span>
+            {% endif %}
+            {% if recipe.steps %}
+            <span class="meta-pill">📝 {{ recipe.steps | length }} steps</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="recipe-content">
+        <!-- Ingredients Section -->
+        <div class="recipe-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span>🥬</span> Ingredients
+                </h3>
+                {% if recipe.ingredients %}
+                <button class="add-all-btn" onclick="addAllToCart()">
+                    <span>🛒</span> Add All to Shopping List
+                </button>
+                {% endif %}
+            </div>
+            {% if recipe.ingredients %}
+            <ul class="ingredients-list" id="ingredients-list">
+                {% for ing in recipe.ingredients %}
+                <li class="ingredient-item" data-ingredient="{% if ing.name %}{{ ing.name }}{% else %}{{ ing }}{% endif %}">
+                    <span class="ingredient-icon">🥄</span>
+                    <span class="ingredient-name">
+                        {% if ing.name %}
+                        {{ ing.name }}
+                        {% else %}
+                        {{ ing }}
+                        {% endif %}
+                    </span>
+                    {% if ing.amount %}
+                    <span class="ingredient-amount">{{ ing.amount }}</span>
+                    {% endif %}
+                    <button class="add-to-cart-btn" onclick="addToCart(this, '{% if ing.name %}{{ ing.name }}{% else %}{{ ing }}{% endif %}')" title="Add to shopping list">
+                        🛒
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color: var(--text-muted);">No ingredients list provided</p>
+            {% endif %}
+        </div>
+
+        <!-- Steps Section -->
+        <div class="recipe-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span>📋</span> Instructions
+                </h3>
+            </div>
+            {% if recipe.steps %}
+            <ol class="steps-list">
+                {% for step in recipe.steps %}
+                <li class="step-item" data-step="{{ loop.index }}">
+                    <div class="step-content">{{ step }}</div>
+                </li>
+                {% endfor %}
+            </ol>
+            {% else %}
+            <p style="color: var(--text-muted);">No steps provided</p>
+            {% endif %}
+        </div>
+
+        <!-- Tools Section -->
+        {% if recipe.tools %}
+        <div class="recipe-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span>🍳</span> Tools Needed
+                </h3>
+            </div>
+            <div class="tools-grid">
+                {% for tool in recipe.tools %}
+                <span class="tool-badge">
+                    <span>🔧</span>
+                    {{ tool }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Substitutions Section -->
+        {% if recipe.substitutions %}
+        <div class="recipe-section">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span>🔄</span> Substitutions
+                </h3>
+            </div>
+            <ul class="substitutions-list">
+                {% if recipe.substitutions is mapping %}
+                {% for key, value in recipe.substitutions.items() %}
+                <li class="substitution-item">
+                    <span class="sub-icon">🥫</span>
+                    <span>{{ key }}</span>
+                    <span class="sub-arrow">→</span>
+                    <span><strong>{{ value }}</strong></span>
+                </li>
+                {% endfor %}
+                {% else %}
+                {% for sub in recipe.substitutions %}
+                <li class="substitution-item">
+                    <span class="sub-icon">💡</span>
+                    <span>{{ sub }}</span>
+                </li>
+                {% endfor %}
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="empty-state">
+    <div class="empty-icon">🍽️</div>
+    <h2>No Recipe Yet</h2>
+    <p>
+        {% if include %}
+        We couldn't find a recipe with your ingredients. Try different combinations!
+        {% else %}
+        Add some ingredients to discover delicious recipes!
+        {% endif %}
+    </p>
+    <a href="{{ url_for('pages.ingredients') }}" class="btn">
+        🥬 Add Ingredients
+    </a>
+</div>
+{% endif %}
+
+{% if other_suggestions %}
+<div class="recipe-section" style="margin-top: 2rem;">
+    <div class="section-header">
+        <h3 class="section-title">
+            <span>✨</span> Other Suggestions
+        </h3>
+    </div>
+    <ul>
+        {% for r in other_suggestions %}
+        <li>{{ r.name }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<a href="{{ url_for('pages.ingredients') }}" class="back-link">
+    ← Back to Ingredients
+</a>
+
+<!-- Toast notification -->
+<div class="toast" id="toast">
+    <span>✅</span>
+    <span id="toast-message">Added to shopping list!</span>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    // Show toast notification
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        const msgSpan = document.getElementById('toast-message');
+        msgSpan.textContent = message;
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // Add single ingredient to shopping list
+    async function addToCart(btn, ingredient) {
+        try {
+            const response = await fetch('/shopping-list/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: ingredient })
+            });
+
+            if (response.ok) {
+                btn.classList.add('added');
+                btn.innerHTML = '✓';
+                showToast(`Added "${ingredient}" to shopping list`);
+            }
+        } catch (err) {
+            console.error('Error adding to cart:', err);
+        }
+    }
+
+    // Add all ingredients to shopping list
+    async function addAllToCart() {
+        const ingredients = [];
+        document.querySelectorAll('.ingredient-item').forEach(item => {
+            const name = item.dataset.ingredient;
+            if (name) ingredients.push(name);
+        });
+
+        if (ingredients.length === 0) return;
+
+        try {
+            const response = await fetch('/shopping-list/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: ingredients })
+            });
+
+            if (response.ok) {
+                // Mark all buttons as added
+                document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                    btn.classList.add('added');
+                    btn.innerHTML = '✓';
+                });
+
+                showToast(`Added ${ingredients.length} ingredients to shopping list`);
+            }
+        } catch (err) {
+            console.error('Error adding all to cart:', err);
+        }
+    }
+</script>
 {% endblock %}

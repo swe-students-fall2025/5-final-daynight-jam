@@ -1,9 +1,100 @@
 # app/pages.py
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import login_required
 from .ml_client import get_recommendation
 
 pages_bp = Blueprint("pages", __name__)
+
+
+# ─────────────────────────────────────────────────────────────
+# Shopping List Routes
+# ─────────────────────────────────────────────────────────────
+
+@pages_bp.route("/shopping-list")
+@login_required
+def shopping_list():
+    """Shopping list page."""
+    items = session.get("shopping_list", [])
+    return render_template("shopping_list.html", items=items)
+
+
+@pages_bp.route("/shopping-list/add", methods=["POST"])
+@login_required
+def add_to_shopping_list():
+    """Add item(s) to shopping list."""
+    data = request.json or {}
+    items = data.get("items", [])
+    
+    if not items and data.get("item"):
+        items = [data.get("item")]
+    
+    current_list = session.get("shopping_list", [])
+    
+    for item in items:
+        item_clean = item.strip()
+        if item_clean and item_clean not in [i["name"] for i in current_list]:
+            current_list.append({
+                "name": item_clean,
+                "checked": False,
+                "quantity": data.get("quantity", "")
+            })
+    
+    session["shopping_list"] = current_list
+    return jsonify({"success": True, "count": len(current_list)})
+
+
+@pages_bp.route("/shopping-list/remove", methods=["POST"])
+@login_required
+def remove_from_shopping_list():
+    """Remove item from shopping list."""
+    data = request.json or {}
+    item_name = data.get("item", "")
+    
+    current_list = session.get("shopping_list", [])
+    current_list = [i for i in current_list if i["name"] != item_name]
+    
+    session["shopping_list"] = current_list
+    return jsonify({"success": True, "count": len(current_list)})
+
+
+@pages_bp.route("/shopping-list/toggle", methods=["POST"])
+@login_required
+def toggle_shopping_item():
+    """Toggle item checked status."""
+    data = request.json or {}
+    item_name = data.get("item", "")
+    
+    current_list = session.get("shopping_list", [])
+    for item in current_list:
+        if item["name"] == item_name:
+            item["checked"] = not item["checked"]
+            break
+    
+    session["shopping_list"] = current_list
+    return jsonify({"success": True})
+
+
+@pages_bp.route("/shopping-list/clear", methods=["POST"])
+@login_required
+def clear_shopping_list():
+    """Clear all items from shopping list."""
+    session["shopping_list"] = []
+    return jsonify({"success": True})
+
+
+@pages_bp.route("/shopping-list/clear-checked", methods=["POST"])
+@login_required
+def clear_checked_items():
+    """Clear only checked items from shopping list."""
+    current_list = session.get("shopping_list", [])
+    current_list = [i for i in current_list if not i["checked"]]
+    session["shopping_list"] = current_list
+    return jsonify({"success": True, "count": len(current_list)})
+
+
+# ─────────────────────────────────────────────────────────────
+# Main Pages
+# ─────────────────────────────────────────────────────────────
 
 @pages_bp.route("/")
 @login_required
