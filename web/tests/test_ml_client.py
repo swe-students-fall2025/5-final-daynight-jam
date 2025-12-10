@@ -1,4 +1,4 @@
-from ml_subsystem import get_recommendation, replace_ingredient
+from web.ml_subsystem import get_recommendation, replace_ingredient
 
 def test_get_recommendation(mock_ml_client):
     payload = {"include": ["ing1"]}

@@ -1,5 +1,5 @@
 from flask import Flask
-from mongodb_subsystem import init_mongo
+from web.mongodb_subsystem import init_mongo
 from .auth import auth_bp, bcrypt, login_manager
 from .api import api_bp
 from .pages import pages_bp
