@@ -26,15 +26,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push to dockerhub
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./web
+          file: ./web/Dockerfile
           push: true
-          tags: |
-            TogawaSalo0214/daynight-jam:latest
-            TogawaSalo0214/daynight-jam:${{ github.sha }}
-
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/recipe-jam-web:latest
+      
       - name: Deploy to Digital Ocean
         uses: digitalocean/app_action/deploy@v2
         with:
